@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)http://getbootstrap.com/docs/4.0/examples/dashboard/ -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<script src="https://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<title>Dashboard Template for Bootstrap</title>
+	<!-- Bootstrap core CSS -->
+	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+
+	<!-- Custom styles for this template -->
+	<link th:href="@{/css/dashboard.css}" rel="stylesheet">
+	<style type="text/css">
+		/* Chart.js */
+
+		@-webkit-keyframes chartjs-render-animation {
+			from {
+				opacity: 0.99
+			}
+			to {
+				opacity: 1
+			}
+		}
+
+		@keyframes chartjs-render-animation {
+			from {
+				opacity: 0.99
+			}
+			to {
+				opacity: 1
+			}
+		}
+
+		.chartjs-render-monitor {
+			-webkit-animation: chartjs-render-animation 0.001s;
+			animation: chartjs-render-animation 0.001s;
+		}
+		.my-hr {
+			border: none;
+			border-top: 3px solid black;
+			margin: 20px 0;
+		}
+	</style>
+</head>
+
+<body>
+<!--   顶部导航栏-->
+<div th:replace="~{commoms/commoms::topbar}"></div>
+
+<div class="container-fluid">
+	<div class="row">
+		<!--   侧边栏-->
+		<div th:replace="~{commoms/commoms::sidebar(active='list.html')}"></div>
+
+		<main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+			<input type="hidden" id="contest_id" name="contest_id" th:value="${contest_id}">
+			<tbody>
+			<tr th:each="problem:${problems}">
+				<td>
+					<div class="container">
+						<div class="row">
+							<div class="col-md-6">
+								<form>
+									<div class="form-group">
+										<div>[[${problem.getId()}]],[[${problem.getTitle()}]]</div>
+									</div>
+									<div class="form-group">
+										<div><B>描述：</B>[[${problem.getDescription()}]]</div>
+									</div>
+									<div class="form-group">
+										<B>样例1：</B>
+										<div>输入：[[${problem.getSample_input_1()}]]</div>
+									</div>
+									<div class="form-group">
+										<div>输出：[[${problem.getSample_output_1()}]]</div>
+									</div>
+									<div class="form-group">
+										<B>样例2：</B>
+										<div>输入：[[${problem.getSample_input_2()}]]</div>
+									</div>
+									<div class="form-group">
+										<div>输出：[[${problem.getSample_output_2()}]]</div>
+									</div>
+									<div class="form-group">
+										<B>样例3：</B>
+										<div>输入：[[${problem.getSample_input_3()}]]</div>
+									</div>
+									<div class="form-group">
+										<div>输出：[[${problem.getSample_output_3()}]]</div>
+									</div>
+<!--									<div class="form-group">-->
+<!--										<div><B>时间限制：</B>[[${problem.getTime_limit()}]]</div>-->
+<!--									</div>-->
+<!--									<div class="form-group">-->
+<!--										<div><B>内存限制：</B>[[${problem.getMemory_limit()}]]</div>-->
+<!--									</div>-->
+									<div class="form-group">
+										<div><B>标签：</B>[[${problem.getTags()}]]</div>
+									</div>
+								</form>
+								<hr>
+							</div>
+							<div class="col-md-6">
+								<form id="form1" onsubmit="return false" action="##">
+									<input type="hidden" id="problem_id" name="problem_id" th:value="${problem.getId()}">
+									<input type="hidden" id="code_c" name="code_c" th:value="${problem.getDeclaration_c()}">
+									<input type="hidden" id="code_java" name="code_java" th:value="${problem.getDeclaration_java()}">
+									<div class="form-group">
+										<label for="language">语言</label>
+										<select onchange="a2(this)" class="form-control" id="language" name="language" required>
+											<option value="">请选择语言</option>
+											<option value="1">C语言</option>
+											<option value="2">C++</option>
+											<option value="3">Java</option>
+										</select>
+									</div>
+									<div class="form-group">
+										<label for="code">代码</label>
+										<textarea class="form-control" id="code" name="code" rows="10" required></textarea>
+									</div>
+								</form>
+								<hr>
+							</div>
+						</div>
+					</div>
+				</td>
+			</tr>
+			<button type="submit" class="btn btn-primary" onclick="submitPaper()">提交</button>
+			</tbody>
+		</main>
+	</div>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script type="text/javascript" src="asserts/js/jquery-3.2.1.slim.min.js"></script>
+<script type="text/javascript" src="asserts/js/popper.min.js"></script>
+<script type="text/javascript" src="asserts/js/bootstrap.min.js"></script>
+<!--弹窗-->
+
+<script type="text/javascript">
+	function submitPaper() {
+		if (window.confirm("是否提交？")) {
+			var codes = document.getElementsByName("code");
+			var languages = document.getElementsByName("language");
+			var problem_ids = document.getElementsByName("problem_id");
+			var contest_id = [];
+			contest_id.push(document.getElementById("contest_id").value);
+			var data = [];
+			var list_c=[];
+			var list_l=[];
+			var list_p=[];
+			for (var i = 0; i < problem_ids.length; i++) {
+				list_p.push(problem_ids[i].value);
+			}
+			for (var i = 0; i < languages.length; i++) {
+				list_l.push(languages[i].value);
+			}
+			for (var i = 0; i < codes.length; i++) {
+				list_c.push(codes[i].value);
+			}
+			data.push(list_p);
+			data.push(list_l);
+			data.push(list_c);
+			data.push(contest_id);
+
+			// 发送AJAX请求
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', '/submitPaper', true);
+			xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+			xhr.send(JSON.stringify(data));
+			alert("数据已提交，稍后自行查看分数")
+			window.history.back(-1);
+		}
+
+	}
+</script>
+<script>
+	function a2(selectElement) {
+		// 获取选中的语言值
+		var language = selectElement.value
+		// 根据选中的语言值更新textarea的内容
+		var textarea = selectElement.parentElement.nextElementSibling.getElementsByTagName("textarea")[0];
+		if (language == "1" || language == "2") {
+			// 获取往前数第二个input标签的内容
+			var inputElement = selectElement.parentElement.parentElement.getElementsByTagName("input")[1];
+			textarea.value = inputElement.value;
+		} else if (language == "3") {
+			// 获取往前数第一个input标签的内容
+			var inputElement = selectElement.parentElement.parentElement.getElementsByTagName("input")[2];
+			textarea.value = inputElement.value;
+		} else {
+			textarea.value = "";
+		}
+	}
+</script>
+
+
+
+<!-- Icons -->
+<script type="text/javascript" src="asserts/js/feather.min.js"></script>
+<script>
+	feather.replace()
+</script>
+
+<!-- Graphs -->
+<script type="text/javascript" src="asserts/js/Chart.min.js"></script>
+
+
+
+</body>
+
+</html>

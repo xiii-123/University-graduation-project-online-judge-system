@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wyh.online_judge.mapper.SubmissionMapper">
+    <!-- 查询所有记录 -->
+    <select id="querySubmissionList" resultType="Submission">
+        SELECT * FROM submission
+    </select>
+<!--    根据用户名和题目查询数据-->
+    <select id="querySubmissionByUserNameAndProblem" parameterType="String" resultType="Submission">
+        SELECT s.*
+        FROM submission s
+        INNER JOIN user u ON s.user_id = u.id
+        INNER JOIN problem p ON s.problem_id = p.id
+        WHERE u.username = #{userName} AND p.title LIKE CONCAT('%', #{problemName}, '%')
+    </select>
+    <!--    根据用户名id查找记录-->
+    <select id="querySubmissionByUserId" parameterType="int" resultMap="Submission_problem">
+        SELECT @rownum:=@rownum+1 AS 'index', problem.title AS 'problem', submission.language AS 'language',
+        submission.code AS 'code', submission.result AS 'result', submission.submit_time AS 'submit_time'
+        FROM submission
+        JOIN problem ON submission.problem_id = problem.id
+        JOIN (SELECT @rownum:=0) r
+        WHERE submission.user_id = #{user_id}
+        ORDER BY submission.id ASC;
+    </select>
+    <!--    根据用户名id和关键字查找记录-->
+    <select id="querySubmissionByUserIdAndKeyword" resultMap="Submission_problem">
+        SELECT @rownum:=@rownum+1 AS 'index', problem.title AS 'problem', submission.language AS 'language',
+        submission.code AS 'code', submission.result AS 'result', submission.submit_time AS 'submit_time'
+        FROM submission
+        JOIN problem ON submission.problem_id = problem.id
+        JOIN (SELECT @rownum:=0) r
+        WHERE submission.user_id = #{param1}
+        AND problem.title LIKE CONCAT('%', #{param2}, '%')
+        ORDER BY submission.id ASC;
+    </select>
+    <resultMap id="Submission_problem" type="Submission_problem">
+        <result property="index" column="index" />
+        <result property="problem" column="problem" />
+        <result property="language" column="language" />
+        <result property="code" column="code" />
+        <result property="result" column="result" />
+        <result property="submit_time" column="submit_time" />
+    </resultMap>
+<!--    查询记录数量-->
+    <select id="getNum" resultType="Integer">
+        SELECT COUNT(*) FROM submission
+    </select>
+    <!-- 插入Submission记录 -->
+    <insert id="addSubmission" parameterType="Submission">
+        INSERT INTO submission (user_id, problem_id, language, code, result, time_used, memory_used, submit_time)
+        VALUES (#{user_id}, #{problem_id}, #{language}, #{code}, #{result}, #{time_used}, #{memory_used}, #{submit_time})
+    </insert>
+<!--    获取排行榜-->
+    <select id="getRank" resultMap="rankMap">
+        SELECT @rank := @rank + 1 AS `index`, u.username AS `username`,
+        SUM(CASE WHEN p.difficulty = 1 THEN 1 WHEN p.difficulty = 2 THEN 2 WHEN p.difficulty = 3 THEN 3 ELSE 0 END) AS `score`,
+        COUNT(DISTINCT s.problem_id) AS `solvedNums`
+        FROM (SELECT DISTINCT user_id, problem_id FROM submission WHERE result = '2') s
+        INNER JOIN user u ON s.user_id = u.id
+        INNER JOIN problem p ON s.problem_id = p.id
+        CROSS JOIN (SELECT @rank := 0) r
+        GROUP BY s.user_id
+        ORDER BY `score` DESC;
+    </select>
+    <resultMap id="rankMap" type="Rank">
+        <result property="index" column="index" />
+        <result property="username" column="username" />
+        <result property="score" column="score" />
+        <result property="solvedNums" column="solvedNums" />
+    </resultMap>
+    <!-- 删除记录 -->
+    <delete id="deleteSubmissionByUserId" parameterType="int">
+        DELETE FROM submission WHERE user_id = #{user_id}
+    </delete>
+    <!-- 删除记录 -->
+    <delete id="deleteSubmissionByProblemId" parameterType="int">
+        DELETE FROM submission WHERE problem_id = #{problem_id}
+    </delete>
+
+</mapper>

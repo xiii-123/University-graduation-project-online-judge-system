@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wyh.online_judge.mapper.Contest_userMapper">
+<!--    查询所有记录-->
+    <select id="queryContest_userList" resultMap="Contest_result">
+        SELECT u.username AS username, c.title AS contest_name, cu.record AS record, cu.submit_time AS submit_time
+        FROM contest_user cu
+        INNER JOIN contest c ON cu.contest_id = c.id
+        INNER JOIN user u ON u.id = cu.user_id;
+    </select>
+    <!-- 根据用户ID和关键字查询记录 -->
+    <select id="queryContest_userByUserIdAndKeywords" resultMap="Contest_result">
+        SELECT u.username AS username, c.title AS contest_name, cu.record AS record, cu.submit_time AS submit_time
+        FROM contest_user cu
+        INNER JOIN contest c ON cu.contest_id = c.id
+        INNER JOIN user u ON u.id = cu.user_id
+        WHERE cu.user_id = #{param1}
+        AND (c.title LIKE CONCAT('%', #{param2}, '%') OR c.description LIKE CONCAT('%', #{param2}, '%'));
+    </select>
+    <!-- 根据关键字查询记录 -->
+    <select id="queryContest_userByKeywords" resultMap="Contest_result">
+        SELECT u.username AS username, c.title AS contest_name, cu.record AS record, cu.submit_time AS submit_time
+        FROM contest_user cu
+        INNER JOIN contest c ON cu.contest_id = c.id
+        INNER JOIN user u ON u.id = cu.user_id
+        WHERE (c.title LIKE CONCAT('%', #{param1}, '%') OR c.description LIKE CONCAT('%', #{param1}, '%'));
+    </select>
+    <!-- 根据用户Id-->
+    <select id="queryContest_userByUserId" parameterType="int" resultMap="Contest_result">
+        SELECT u.username AS username, c.title AS contest_name, cu.record AS record, cu.submit_time AS submit_time
+        FROM contest_user cu
+        INNER JOIN contest c ON cu.contest_id = c.id
+        INNER JOIN user u ON u.id = cu.user_id
+        WHERE cu.user_id = #{param1}
+    </select>
+    <resultMap id="Contest_result" type="Contest_result">
+        <result property="username" column="username" />
+        <result property="contest_name" column="contest_name" />
+        <result property="record" column="record" />
+        <result property="submit_time" column="submit_time" />
+    </resultMap>
+    <insert id="addContest_user" parameterType="Contest_user" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO contest_user (contest_id, user_id, record, submit_time)
+        VALUES (#{contest_id}, #{user_id}, #{record}, #{submit_time})
+    </insert>
+    <!-- 根据用户id竞赛记录 -->
+    <delete id="deleteContest_userByUserId" parameterType="int">
+        DELETE FROM contest_user WHERE user_id = #{user_id}
+    </delete>
+
+
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wyh.online_judge.mapper.ProblemMapper">
+    <!-- 查询所有题目 -->
+    <select id="queryProblemList" resultType="Problem">
+        SELECT * FROM problem
+    </select>
+
+    <!-- 根据ID查询题目 -->
+    <select id="queryProblemById" parameterType="int" resultType="Problem">
+        SELECT * FROM problem WHERE id = #{id}
+    </select>
+
+    <!-- 根据关键字查询题目 -->
+    <select id="queryProblemsByKeyword" parameterType="String" resultType="Problem">
+        SELECT * FROM problem
+        WHERE title LIKE CONCAT('%', #{str}, '%')
+        OR description LIKE CONCAT('%', #{str}, '%')
+    </select>
+
+    <!-- 根据标签查询题目 -->
+    <select id="queryProblemByTag" parameterType="String" resultType="Problem">
+        SELECT * FROM problem WHERE tags LIKE CONCAT('%', #{str}, '%')
+    </select>
+
+    <!-- 增加题目 -->
+    <insert id="addProblem" parameterType="Problem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO problem(title, description, declaration_c, declaration_java, test_set, main_c, main_java, sample_input_1, sample_output_1, sample_input_2, sample_output_2, sample_input_3, sample_output_3, time_limit, memory_limit, difficulty, tags, create_time, update_time)
+        VALUES (#{title}, #{description}, #{declaration_c}, #{declaration_java}, #{test_set}, #{main_c}, #{main_java}, #{sample_input_1}, #{sample_output_1}, #{sample_input_2}, #{sample_output_2}, #{sample_input_3}, #{sample_output_3}, #{time_limit}, #{memory_limit}, #{difficulty}, #{tags}, #{create_time}, #{update_time})
+    </insert>
+
+    <!-- 更新题目信息 -->
+    <update id="updateProblem" parameterType="Problem">
+        UPDATE problem SET title = #{title}, description = #{description}, declaration_c = #{declaration_c}, declaration_java = #{declaration_java}, test_set = #{test_set}, main_c = #{main_c}, main_java = #{main_java}, sample_input_1 = #{sample_input_1}, sample_output_1 = #{sample_output_1}, sample_input_2 = #{sample_input_2}, sample_output_2 = #{sample_output_2}, sample_input_3 = #{sample_input_3}, sample_output_3 = #{sample_output_3}, time_limit = #{time_limit}, memory_limit = #{memory_limit}, difficulty = #{difficulty}, tags = #{tags}, update_time = #{update_time}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除题目 -->
+    <delete id="deleteProblem" parameterType="int">
+        DELETE FROM problem WHERE id = #{id}
+    </delete>
+
+</mapper>

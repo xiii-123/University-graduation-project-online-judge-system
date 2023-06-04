@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wyh.online_judge.mapper.UserMapper">
+    <!-- 查询所有用户 -->
+    <select id="queryUserList" resultType="User">
+        SELECT * FROM user
+    </select>
+
+    <!-- 根据ID查询用户 -->
+    <select id="queryUserById" parameterType="int" resultType="User">
+        SELECT * FROM user WHERE id = #{id}
+    </select>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="queryUserByUserName" parameterType="String" resultType="User">
+        SELECT * FROM user WHERE username = #{username}
+    </select>
+
+    <!-- 根据关键字查询用户 -->
+    <select id="queryUsersByKeyword" parameterType="String" resultType="User">
+        SELECT * FROM user WHERE username LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+
+    <!-- 增加用户 -->
+    <insert id="addUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user(username, password, email, role)
+        VALUES (#{username}, #{password}, #{email}, #{role})
+    </insert>
+
+    <!-- 更新用户信息 -->
+    <update id="updateUser" parameterType="User">
+        UPDATE user SET username = #{username}, password = #{password}, email = #{email}, role = #{role}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除用户 -->
+    <delete id="deleteUser" parameterType="int">
+        DELETE FROM user WHERE id = #{id}
+    </delete>
+</mapper>

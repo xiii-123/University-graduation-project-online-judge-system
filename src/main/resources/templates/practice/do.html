@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)http://getbootstrap.com/docs/4.0/examples/dashboard/ -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<script src="https://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<title>Dashboard Template for Bootstrap</title>
+	<!-- Bootstrap core CSS -->
+	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+
+	<!-- Custom styles for this template -->
+	<link th:href="@{/css/dashboard.css}" rel="stylesheet">
+	<style type="text/css">
+		/* Chart.js */
+
+		@-webkit-keyframes chartjs-render-animation {
+			from {
+				opacity: 0.99
+			}
+			to {
+				opacity: 1
+			}
+		}
+
+		@keyframes chartjs-render-animation {
+			from {
+				opacity: 0.99
+			}
+			to {
+				opacity: 1
+			}
+		}
+
+		.chartjs-render-monitor {
+			-webkit-animation: chartjs-render-animation 0.001s;
+			animation: chartjs-render-animation 0.001s;
+		}
+	</style>
+</head>
+
+<body>
+<!--   顶部导航栏-->
+<div th:replace="~{commoms/commoms::topbar}"></div>
+
+<div class="container-fluid">
+	<div class="row">
+		<!--   侧边栏-->
+		<div th:replace="~{commoms/commoms::sidebar(active='list.html')}"></div>
+
+		<main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-6">
+							<form method="post">
+
+								<div class="form-group">
+									<div>[[${problem.getId()}]],[[${problem.getTitle()}]]</div>
+								</div>
+								<div class="form-group">
+									<div><B>描述：</B>[[${problem.getDescription()}]]</div>
+								</div>
+								<div class="form-group">
+									<B>样例1：</B>
+									<div>输入：[[${problem.getSample_input_1()}]]</div>
+								</div>
+								<div class="form-group">
+									<div>输出：[[${problem.getSample_output_1()}]]</div>
+								</div>
+								<div class="form-group">
+									<B>样例2：</B>
+									<div>输入：[[${problem.getSample_input_2()}]]</div>
+								</div>
+								<div class="form-group">
+									<div>输出：[[${problem.getSample_output_2()}]]</div>
+								</div>
+								<div class="form-group">
+									<B>样例3：</B>
+									<div>输入：[[${problem.getSample_input_3()}]]</div>
+								</div>
+								<div class="form-group">
+									<div>输出：[[${problem.getSample_output_3()}]]</div>
+								</div>
+<!--								<div class="form-group">-->
+<!--									<div><B>时间限制：</B>[[${problem.getTime_limit()}]]</div>-->
+<!--								</div>-->
+<!--								<div class="form-group">-->
+<!--									<div><B>内存限制：</B>[[${problem.getMemory_limit()}]]</div>-->
+<!--								</div>-->
+								<div class="form-group">
+									<div><B>标签：</B>[[${problem.getTags()}]]</div>
+								</div>
+							</form>
+						</div>
+						<div class="col-md-6">
+							<form id="form1" onsubmit="return false" action="##">
+								<input type="hidden" id="problem_id" name="problem_id" th:value="${problem.getId()}">
+								<input type="hidden" id="code_c" name="code_c" th:value="${problem.getDeclaration_c()}">
+								<input type="hidden" id="code_java" name="code_java" th:value="${problem.getDeclaration_java()}">
+								<div class="form-group">
+									<label for="language">语言</label>
+									<select th:selected="1" class="form-control" id="language" name="language" onchange="a2()" required>
+										<option value="">请选择语言</option>
+										<option value="1">C语言</option>
+										<option value="2">C++</option>
+										<option value="3">Java</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label for="code">代码</label>
+									<textarea class="form-control" id="code" name="code" rows="10" required></textarea>
+								</div>
+								<input type="button" value="提交" onclick="a1()">
+							</form>
+						</div>
+					</div>
+				</div>
+		</main>
+	</div>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script type="text/javascript" src="asserts/js/jquery-3.2.1.slim.min.js"></script>
+<script type="text/javascript" src="asserts/js/popper.min.js"></script>
+<script type="text/javascript" src="asserts/js/bootstrap.min.js"></script>
+<!--弹窗-->
+
+<script type="text/javascript">
+	function a1() {
+		alert("判题中，请稍后……")
+		$.ajax({
+			url:"/judgment",
+			data:{
+				"problem_id":$("input#problem_id").val(),
+				"language":$("#language").val(),
+				"code":$("#code").val()
+			},
+			success:function (data){
+				var obj = JSON.parse(data)
+				if (obj.result==2){
+					alert("恭喜通过！")
+				}else if (obj.result == 1){
+					var out = obj.stderr.split(":")
+					alert("代码未通过！"+"\n标准输入："+out[1]+"\n你的输出："+out[2]+"\n标准输出："+out[3]);
+				}else{
+					alert("编译未通过！\n"+obj.compile_error);
+				}
+			}
+		})
+
+	}
+</script>
+<script>
+	function a2() {
+		// 获取选中的语言值
+		var language = document.getElementById("language").value;
+
+		// 根据选中的语言值更新textarea的内容
+		var textarea = document.getElementById("code");
+		if (language == "1") {
+			textarea.value = $("input#code_c").val();
+		} else if (language == "2") {
+			textarea.value = $("input#code_c").val();
+		} else if (language == "3") {
+			textarea.value = $("input#code_java").val();
+		} else {
+			textarea.value = "";
+		}
+	}
+</script>
+
+
+<!-- Icons -->
+<script type="text/javascript" src="asserts/js/feather.min.js"></script>
+<script>
+	feather.replace()
+</script>
+
+<!-- Graphs -->
+<script type="text/javascript" src="asserts/js/Chart.min.js"></script>
+
+
+
+</body>
+
+</html>

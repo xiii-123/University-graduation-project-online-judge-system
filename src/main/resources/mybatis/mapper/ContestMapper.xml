@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wyh.online_judge.mapper.ContestMapper">
+    <!-- 查询所有竞赛 -->
+    <select id="queryContestList" resultType="Contest">
+        SELECT * FROM contest
+    </select>
+
+<!--    根据Id查询竞赛-->
+    <select id="queryContestById" parameterType="int" resultType="Contest">
+        SELECT * FROM contest WHERE id = #{id}
+    </select>
+    <!-- 根据用户名和关键字查询竞赛 -->
+    <select id="queryContestsBySponsorAndKeyword" parameterType="String" resultType="Contest">
+        SELECT * FROM contest WHERE sponsor LIKE CONCAT('%', #{sponsor}, '%')
+        AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
+    </select>
+
+    <!-- 增加竞赛 -->
+    <insert id="addContest" parameterType="Contest" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO contest(title, description, sponsor, problems, start_time, end_time)
+        VALUES (#{title}, #{description}, #{sponsor}, #{problems}, #{start_time}, #{end_time})
+    </insert>
+
+    <!-- 更新竞赛信息 -->
+    <update id="updateContest" parameterType="Contest">
+        UPDATE contest SET title = #{title}, description = #{description}, sponsor = #{sponsor}, problems = #{problems}, start_time = #{start_time}, end_time = #{end_time}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除竞赛 -->
+    <delete id="deleteContest" parameterType="int">
+        DELETE FROM contest WHERE id = #{id}
+    </delete>
+
+
+</mapper>
